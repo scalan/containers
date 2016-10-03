@@ -6,7 +6,7 @@ import scalan.collections.{CollectionsDslExp, CollectionsDslStd, CollectionsDsl}
 import scalan.{ScalanExp, ScalanStd, Scalan}
 import scala.reflect.runtime.universe._
 
-trait CollectionContainers extends StructuredContainers { self: CollectionsDsl =>
+trait CollectionContainers { self: ContainersDsl =>
 
   trait CollectionEnumarable extends CollectionFunctor with Enumerable[Collection] {
     def length[A](xs: Rep[Collection[A]]): Rep[Int] = xs.length
@@ -63,8 +63,8 @@ trait CollectionContainers extends StructuredContainers { self: CollectionsDsl =
 
 }
 
-trait CollectionContainersSeq extends CollectionContainers { self: CollectionsDslStd => }
-trait CollectionContainersExp extends CollectionsDslExp with CollectionContainers { self: CollectionsDslExp =>
+trait CollectionContainersSeq extends CollectionContainers { self: ContainersDslStd => }
+trait CollectionContainersExp extends CollectionsDslExp with CollectionContainers { self: ContainersDslExp =>
 
   override protected def getResultElem(receiver: Exp[_], m: Method, args: List[AnyRef]): Elem[_] = receiver.elem match {
     case e: CollectionElem[r,_] => (e.eItem, m.getName) match {

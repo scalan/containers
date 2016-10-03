@@ -4,7 +4,7 @@ import scalan.collections.{CollectionsDslExp, CollectionsDslStd, CollectionsDsl}
 import scalan.{ScalanExp, ScalanStd, Scalan}
 import scala.reflect.runtime.universe._
 
-trait ArrayContainers extends StructuredContainers { self: CollectionsDsl =>
+trait ArrayContainers { self: ContainersDsl =>
 
   trait ArrayEnumarable extends ArrayFunctor with Enumerable[Array] {
     def length[A](xs: Rep[Array[A]]): Rep[Int] = {
@@ -72,5 +72,5 @@ trait ArrayContainers extends StructuredContainers { self: CollectionsDsl =>
 
 }
 
-trait ArrayContainersSeq extends ArrayContainers { self: CollectionsDslStd => }
-trait ArrayContainersExp extends ArrayContainers { self: CollectionsDslExp => }
+trait ArrayContainersSeq extends ArrayContainers { self: ContainersDslStd => }
+trait ArrayContainersExp extends ArrayContainers { self: ContainersDslExp => }

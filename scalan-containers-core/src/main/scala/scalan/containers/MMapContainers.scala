@@ -4,7 +4,7 @@ import scalan.collections._
 import scalan.{ScalanExp, ScalanStd, Scalan}
 import scala.reflect.runtime.universe._
 
-trait MMapContainers extends StructuredContainers with CollectionContainers { self: CollectionsDsl =>
+trait MMapContainers extends CollectionContainers { self: ContainersDsl =>
 
   trait MMapContainer[K] extends Cont[({type f[x] = MMap[K,x]})#f] {
     implicit def eK: Elem[K]
@@ -89,5 +89,5 @@ trait MMapContainers extends StructuredContainers with CollectionContainers { se
 
 }
 
-trait MMapContainersSeq extends MMapContainers { self: CollectionsDslStd => }
-trait MMapContainersExp extends MMapContainers { self: CollectionsDslExp => }
+trait MMapContainersSeq extends MMapContainers { self: ContainersDslStd => }
+trait MMapContainersExp extends MMapContainers { self: ContainersDslExp => }

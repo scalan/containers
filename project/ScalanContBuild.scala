@@ -52,15 +52,12 @@ object ScalanContBuild extends Build {
       p.configs(ItTest).settings(commonSettings: _*)
   }
 
-  val virtScala = Option(System.getenv("SCALA_VIRTUALIZED_VERSION")).getOrElse("2.11.2")
-  
   def scalanDependency(name: String) = "com.huawei.scalan" %% name % "0.3.0-SNAPSHOT"
 
   lazy val scalanMeta        = scalanDependency("scalan-meta")
   lazy val scalanCommon      = scalanDependency("scalan-common")
   lazy val scalanCore        = scalanDependency("scalan-core")
   lazy val scalanCollections = scalanDependency("scalan-collections")
-  lazy val scalanLms         = scalanDependency("scalan-lms-backend-core")
 
   lazy val meta = Project(
     id = "scalan-containers-meta",

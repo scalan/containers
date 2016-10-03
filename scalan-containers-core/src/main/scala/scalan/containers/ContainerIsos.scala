@@ -5,7 +5,7 @@ import scalan.collections.{CollectionsDslExp, CollectionsDslStd, CollectionsDsl}
 import scalan.{ScalanExp, ScalanStd, Scalan}
 import scala.reflect.runtime.universe._
 
-trait ContainerIsos extends StructuredContainers { self: CollectionsDsl =>
+trait ContainerIsos { self: ContainersDsl =>
 
   def getRowElem[F[_], S <: Struct](eSchema: Elem[S])(implicit cF: Structured[F]) = (eSchema match {
     case se: StructElem[S] @unchecked =>
@@ -17,15 +17,15 @@ trait ContainerIsos extends StructuredContainers { self: CollectionsDsl =>
   }).asElem[Struct]
 
   case class StructuredIso[F[_], V, Val <: Struct, Schema <: Struct](eTo: Elem[Schema])(implicit val cF: Structured[F]) extends IsoUR[F[V], Schema] {
-    val pairifyIso = PairifyIso[V,Val](getRowElem(eTo).asElem[Val])
+    val pairifyIso = PairifyIso[V,Val](getRowElem[F,Schema](eTo).asElem[Val])
     val eFrom = cF.lift(pairifyIso.eFrom)
 
     def from(columns: Rep[Schema]) =  {
       val res = foldRight[(String,Elem[_]), Rep[F[Any]]](eTo.fields)
-        { case (fn,_) => columns(fn).asRep[F[Any]] }
+        { case (fn,_) => columns.getUntyped(fn).asRep[F[Any]] }
         { case ((fn,fe), col: Rep[F[c]] @unchecked) =>
           implicit val eC = cF.getItemElem(col)
-          columns(fn) match { case aCol: Rep[F[a]] @unchecked => cF.join(aCol, col).asRep[F[Any]] }
+          columns.getUntyped(fn) match { case aCol: Rep[F[a]] @unchecked => cF.join(aCol, col).asRep[F[Any]] }
         }
       res.asRep[F[V]]
     }
@@ -58,7 +58,7 @@ trait ContainerIsos extends StructuredContainers { self: CollectionsDsl =>
   case class ContainerOfStructsIso[F[_], Val <: Struct, ValSchema <: Struct]
         (eTo: Elem[ValSchema])(implicit val cF: Structured[F])
     extends IsoUR[F[Val], ValSchema] {
-    implicit val eVal = getRowElem(eTo).asElem[Val]
+    implicit val eVal = getRowElem[F,ValSchema](eTo).asElem[Val]
     val cFIso = StructuredIso[F,Any,Val,ValSchema](eTo)
     val eFrom = cF.lift(eVal)
 
@@ -99,7 +99,7 @@ trait ContainerIsos extends StructuredContainers { self: CollectionsDsl =>
 
     def from(ys: Rep[ToSchema]) =  {
       val fieldsFrom = eTo.fields.map { case (fn, fe: Elem[To[a]] @unchecked) =>
-        val fa = cIso.from(ys(fn).asRep[To[a]])
+        val fa = cIso.from(ys.getUntyped(fn).asRep[To[a]])
         (fn, fa)
       }
       struct(fieldsFrom).asRep[FromSchema]
@@ -107,7 +107,7 @@ trait ContainerIsos extends StructuredContainers { self: CollectionsDsl =>
 
     def to(xs: Rep[FromSchema]) = {
       val fieldsTo = eFrom.fields.map { case (fn, fe: Elem[From[a]] @unchecked) =>
-        val ta = cIso.to(xs(fn).asRep[From[a]])
+        val ta = cIso.to(xs.getUntyped(fn).asRep[From[a]])
         (fn, ta)
       }
       struct(fieldsTo).asRep[ToSchema]
@@ -136,10 +136,10 @@ trait ContainerIsos extends StructuredContainers { self: CollectionsDsl =>
       val res = foldRight[(String,Elem[_]), Rep[F[Any]]](eTo.fields)
         { case (fn,_) =>
           implicit val eCol = unpackedSchema(fn).asElem[Any]
-          cF.create(keys, columns(fn).asRep[C[Any]]) }
+          cF.create(keys, columns.getUntyped(fn).asRep[C[Any]]) }
         { case ((fn,fe), tab: Rep[F[c]] @unchecked) =>
           implicit val eC = cF.getItemElem(tab)
-          columns(fn) match {
+          columns.getUntyped(fn) match {
             case aCol: Rep[C[a]] @unchecked =>
               implicit val eA = unpackedSchema(fn).asElem[a]
               val aTab = cF.create(keys, aCol)
@@ -184,5 +184,5 @@ trait ContainerIsos extends StructuredContainers { self: CollectionsDsl =>
 
 }
 
-trait ContainerIsosSeq extends ContainerIsos { self: CollectionsDslStd => }
-trait ContainerIsosExp extends ContainerIsos { self: CollectionsDslExp => }
+trait ContainerIsosSeq extends ContainerIsos { self: ContainersDslStd => }
+trait ContainerIsosExp extends ContainerIsos { self: ContainersDslExp => }
